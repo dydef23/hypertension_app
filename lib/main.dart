@@ -47,7 +47,6 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _isClassified = false;
   String _result = '';
   late Interpreter _interpreter;
-  String test = "";
 
   @override
   void initState() {
