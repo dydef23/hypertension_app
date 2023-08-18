@@ -8,12 +8,12 @@ import 'package:file_picker/file_picker.dart';
 import 'app_theme.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
-class result_page extends StatefulWidget {
+class camera_page extends StatefulWidget {
   @override
   _ResultPageState createState() => _ResultPageState();
 }
 
-class _ResultPageState extends State<result_page> {
+class _ResultPageState extends State<camera_page> {
   CameraController? _cameraController;
   List<CameraDescription>? _cameras;
 
@@ -101,15 +101,13 @@ class _ResultPageState extends State<result_page> {
         title: Text(AppTheme.appTitle),
       ),
       body: Center(
-        child: Text(
-          'This is the Result Page',
-        ),
+        child: CameraPreview(_cameraController!),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _openCamera,
-        tooltip: 'Camera',
-        child: Icon(Icons.camera_alt),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: _openCamera,
+      //   tooltip: 'Camera',
+      //   child: Icon(Icons.camera_alt),
+      // ),
     );
   }
 }
