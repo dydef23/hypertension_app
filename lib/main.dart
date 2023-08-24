@@ -46,19 +46,24 @@ class _MyHomePageState extends State<MyHomePage> {
   final CsvHelper _csvHelper = CsvHelper();
   List<List<dynamic>> _csvData = [];
   String? _importedFileName;
-  List<String>? _labels;
   bool _isClassified = false;
   String _result = '';
   String _resultNumb = '';
   late Interpreter _interpreter;
   CameraController? _cameraController;
-  List<CameraDescription>? _cameras;
+
+  //Untuk Percobaan Encoding
+  List<List<dynamic>> _encoding = [];
+  List<List<dynamic>> _encoding1 = [];
+  List<dynamic> _encode = [];
+  List<double> listDouble = [];
+
 
   @override
   void initState() {
     super.initState();
     loadmodel(); // Load the TFLite model on app startup
-    _initializeCamera();
+    // _initializeCamera();
   }
 
   Future<void> _loadCsvData() async {
@@ -72,11 +77,39 @@ class _MyHomePageState extends State<MyHomePage> {
       String csvFilePath = result.files.single.path!;
       String data = await _csvHelper.readCsvFromFile(csvFilePath);
       List<List<dynamic>> parsedData = CsvToListConverter().convert(data);
+
+      // Encoding
+      List<List<dynamic>> tempData = [];
+
+      if (parsedData.length >= 2) {
+        List<dynamic> secondRow = parsedData[1];
+        List<dynamic> processedSecondRow = [];
+        List<dynamic> test = [];
+        var split = secondRow.toString().split(";");
+
+        for (var cell in split) {
+          String cellValue = cell.toString();
+            if (cellValue == "TT" || cellValue == "AA") {
+              processedSecondRow.add(0);
+            } else {
+              processedSecondRow.add(1);
+            }
+        }
+
+        String formattedCell = processedSecondRow.join(';') ;
+        test.add(formattedCell);
+
+        tempData.add(test); // Update the second row with the processed data
+        _csvData = tempData;
+      }
+
+      _showSnackbar("File $_importedFileName berhasil diimpor");
+
       setState(() {
-        _csvData = parsedData;
+        _csvData = tempData;
         _importedFileName = result.files.single.name;
       });
-      _showSnackbar("File $_importedFileName berhasil diimpor");
+
     } else {
       setState(() {
         _importedFileName = null;
@@ -91,12 +124,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void classification() {
     if (_csvData != null && _interpreter != null) {
+
       List<Uint8List> byteslist = _csvData.map((row) {
         return convertStringToBytes(row[0].toString());
-      }).toList();
-
-      List<Float32List> string = _csvData.map((row) {
-        return convertStringToFloat(row[0].toString());
       }).toList();
 
       List<double> input = convertUint8ListToDoubleList(byteslist);
@@ -110,20 +140,14 @@ class _MyHomePageState extends State<MyHomePage> {
       }else{
         _result = "Normal Risk of Hypertension";
       }
-
+      //
       _resultNumb = output[0].toString();
-      var _allResult = output.toString();
-
+      //
       setState(() {
         _isClassified = true;
       });
 
-      // print(inputFix);
-      print(_interpreter.getInputTensors());
-      print(_interpreter.getOutputTensors());
-      print(output);
-      print(_allResult);
-      // print(_resultNumb);
+      print("Output : $output");
 
     } else {
       print("Data CSV belum diimpor atau belum tersedia.");
@@ -141,6 +165,10 @@ class _MyHomePageState extends State<MyHomePage> {
   Uint8List convertStringToBytes(String stringValue) {
     return Uint8List.fromList(stringValue.codeUnits);
     // return Float32List.fromList(stringValue.codeUnits);
+  }
+
+  double convertStringToDouble(String stringValue) {
+    return double.parse(stringValue);
   }
 
   Float32List convertStringToFloat(String stringValue) {
@@ -166,12 +194,31 @@ class _MyHomePageState extends State<MyHomePage> {
     return result;
   }
 
-  void _goToPage2() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => camera_page()),
-    );
+  List<double> convertListDynamicToListDouble(List<dynamic> dynamicList) {
+    List<double> doubleList = [];
+
+    for (var value in dynamicList) {
+      if (value is int) {
+        doubleList.add(value.toDouble());
+      } else if (value is double) {
+        doubleList.add(value);
+      } else if (value is String) {
+        double? parsedValue = double.tryParse(value);
+        if (parsedValue != null) {
+          doubleList.add(parsedValue);
+        }
+      }
+    }
+
+    return doubleList;
   }
+
+  // void _goToPage2() {
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(builder: (context) => camera_page()),
+  //   );
+  // }
 
 
   void _showSnackbar(String message) {
@@ -183,20 +230,20 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Future<void> _initializeCamera() async {
-    _cameras = await availableCameras();
-
-    if (_cameras != null && _cameras!.isNotEmpty) {
-      _cameraController = CameraController(_cameras![0], ResolutionPreset.medium);
-
-      await _cameraController!.initialize().then((_) {
-        if (!mounted) {
-          return;
-        }
-        setState(() {});
-      });
-    }
-  }
+  // Future<void> _initializeCamera() async {
+  //   _cameras = await availableCameras();
+  //
+  //   if (_cameras != null && _cameras!.isNotEmpty) {
+  //     _cameraController = CameraController(_cameras![0], ResolutionPreset.medium);
+  //
+  //     await _cameraController!.initialize().then((_) {
+  //       if (!mounted) {
+  //         return;
+  //       }
+  //       setState(() {});
+  //     });
+  //   }
+  // }
 
   @override
   void dispose() {
@@ -204,25 +251,25 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
-  void _openCamera() {
-    if (_cameraController == null || !_cameraController!.value.isInitialized) {
-      return;
-    }
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: Text('Camera Preview'),
-          ),
-          body: Center(
-            child: CameraPreview(_cameraController!),
-          ),
-        ),
-      ),
-    );
-  }
+  // void _openCamera() {
+  //   if (_cameraController == null || !_cameraController!.value.isInitialized) {
+  //     return;
+  //   }
+  //
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (context) => Scaffold(
+  //         appBar: AppBar(
+  //           title: Text('Camera Preview'),
+  //         ),
+  //         body: Center(
+  //           child: CameraPreview(_cameraController!),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   void _goToScan() {
     Navigator.push(
