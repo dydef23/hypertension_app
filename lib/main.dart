@@ -52,13 +52,6 @@ class _MyHomePageState extends State<MyHomePage> {
   late Interpreter _interpreter;
   CameraController? _cameraController;
 
-  //Untuk Percobaan Encoding
-  List<List<dynamic>> _encoding = [];
-  List<List<dynamic>> _encoding1 = [];
-  List<dynamic> _encode = [];
-  List<double> listDouble = [];
-
-
   @override
   void initState() {
     super.initState();
