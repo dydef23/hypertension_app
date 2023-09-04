@@ -70,6 +70,10 @@ class _QRCodePage extends State<qr_page> {
                               mode: LaunchMode.externalApplication,
                             );
                           }),
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.red, // Mengatur warna latar belakang tombol menjadi merah
+                            onPrimary: Colors.white, // Mengatur warna teks menjadi putih
+                          ),
                           child: const Text('Get Link',
                               style: TextStyle(fontSize: 14)),
                         ),
@@ -81,6 +85,11 @@ class _QRCodePage extends State<qr_page> {
                               await controller?.flipCamera();
                               setState(() {});
                             },
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.white, // Latar belakang putih
+                              onPrimary: Colors.black, // Teks hitam
+                              side: BorderSide(color: Colors.red, width: 1.0),  // Border merah
+                            ),
                             child: FutureBuilder(
                               future: controller?.getCameraInfo(),
                               builder: (context, snapshot) {
@@ -95,7 +104,7 @@ class _QRCodePage extends State<qr_page> {
                       )
                     ],
                   ),
-                  Row(
+                  /*Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
@@ -110,7 +119,7 @@ class _QRCodePage extends State<qr_page> {
                         ),
                       ),
                     ],
-                  ),
+                  ),*/
                 ],
               ),
             ),

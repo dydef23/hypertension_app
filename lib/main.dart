@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: AppTheme.appTitle, // Use the app title from AppTheme
       theme: AppTheme.theme, // Use the theme from AppTheme
-      home: const MyHomePage(title: 'Text Classification'),
+      home: const MyHomePage(title: 'Hypertension Prediction'),
     );
   }
 }
@@ -275,22 +275,38 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        /*backgroundColor: Theme.of(context).colorScheme.inversePrimary,*/
+        backgroundColor: Color(0xFFDC2738),
+        centerTitle: true,
+        title: Text(widget.title,
+            style: TextStyle(
+              color: Colors.white, // Mengatur warna teks menjadi putih
+            ),
+          ),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
+            Image.asset('assets/logo.png'),
+            /*const Text(
               'Classifier',
-            ),
+            ),*/
             ElevatedButton(
               onPressed: _loadCsvData, // Panggil _loadCsvData ketika tombol ditekan.
+              style: ElevatedButton.styleFrom(
+                primary: Colors.red, // Mengatur warna latar belakang tombol menjadi merah
+                onPrimary: Colors.white, // Mengatur warna teks menjadi putih
+              ),
               child: Text('Input CSV File'),
             ),
             ElevatedButton(
-              onPressed: classification, // Panggil _goToPage2 ketika tombol ditekan.
+              onPressed: classification,
+              style: ElevatedButton.styleFrom(
+                primary: Colors.white, // Latar belakang putih
+                onPrimary: Colors.black, // Teks hitam
+                side: BorderSide(color: Colors.red, width: 1.0),  // Border merah
+              ),// Panggil _goToPage2 ketika tombol ditekan.
               child: Text('Classify'),
             ),
             if (_importedFileName != null)
@@ -312,6 +328,8 @@ class _MyHomePageState extends State<MyHomePage> {
             child: FloatingActionButton(
               onPressed: _goToScan,
               tooltip: 'Camera',
+              backgroundColor: Colors.red, // Latar belakang merah
+              foregroundColor: Colors.white,
               child: const Icon(Icons.camera_alt),
             ),
           ),
@@ -320,6 +338,8 @@ class _MyHomePageState extends State<MyHomePage> {
             child: FloatingActionButton(
               onPressed:  _loadCsvData,
               tooltip: 'Import File CSV',
+              backgroundColor: Colors.red, // Latar belakang merah
+              foregroundColor: Colors.white,
               child: const Icon(Icons.file_upload),
             ),
           )
