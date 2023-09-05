@@ -15,6 +15,7 @@ import 'camera_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'app_theme.dart';
 
+
 void main() {
   runApp(const MyApp());
 }
@@ -56,7 +57,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     loadmodel(); // Load the TFLite model on app startup
-    // _initializeCamera();
   }
 
   Future<void> _loadCsvData() async {
@@ -71,37 +71,13 @@ class _MyHomePageState extends State<MyHomePage> {
       String data = await _csvHelper.readCsvFromFile(csvFilePath);
       List<List<dynamic>> parsedData = CsvToListConverter().convert(data);
 
-      // Encoding
-      List<List<dynamic>> tempData = [];
-
-      if (parsedData.length >= 2) {
-        List<dynamic> secondRow = parsedData[1];
-        List<dynamic> processedSecondRow = [];
-        List<dynamic> test = [];
-        var split = secondRow.toString().split(";");
-
-        for (var cell in split) {
-          String cellValue = cell.toString();
-            if (cellValue == "TT" || cellValue == "AA") {
-              processedSecondRow.add(0);
-            } else {
-              processedSecondRow.add(1);
-            }
-        }
-
-        String formattedCell = processedSecondRow.join(';') ;
-        test.add(formattedCell);
-
-        tempData.add(test); // Update the second row with the processed data
-        _csvData = tempData;
-      }
+      setState(() {
+        _csvData = parsedData;
+        _importedFileName = result.files.single.name;
+      });
 
       _showSnackbar("File $_importedFileName berhasil diimpor");
 
-      setState(() {
-        _csvData = tempData;
-        _importedFileName = result.files.single.name;
-      });
 
     } else {
       setState(() {
@@ -133,9 +109,9 @@ class _MyHomePageState extends State<MyHomePage> {
       }else{
         _result = "Normal Risk of Hypertension";
       }
-      //
+
       _resultNumb = output[0].toString();
-      //
+
       setState(() {
         _isClassified = true;
       });
@@ -160,21 +136,6 @@ class _MyHomePageState extends State<MyHomePage> {
     // return Float32List.fromList(stringValue.codeUnits);
   }
 
-  double convertStringToDouble(String stringValue) {
-    return double.parse(stringValue);
-  }
-
-  Float32List convertStringToFloat(String stringValue) {
-    Uint8List uint8Values = Uint8List.fromList(stringValue.codeUnits);
-
-    Float32List floatValues = Float32List(uint8Values.length);
-    for (int i = 0; i < uint8Values.length; i++) {
-      floatValues[i] = uint8Values[i].toDouble();
-    }
-
-    return floatValues;
-  }
-
   List<double> convertUint8ListToDoubleList(List<Uint8List> uint8Lists) {
     List<double> result = [];
 
@@ -187,33 +148,6 @@ class _MyHomePageState extends State<MyHomePage> {
     return result;
   }
 
-  List<double> convertListDynamicToListDouble(List<dynamic> dynamicList) {
-    List<double> doubleList = [];
-
-    for (var value in dynamicList) {
-      if (value is int) {
-        doubleList.add(value.toDouble());
-      } else if (value is double) {
-        doubleList.add(value);
-      } else if (value is String) {
-        double? parsedValue = double.tryParse(value);
-        if (parsedValue != null) {
-          doubleList.add(parsedValue);
-        }
-      }
-    }
-
-    return doubleList;
-  }
-
-  // void _goToPage2() {
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(builder: (context) => camera_page()),
-  //   );
-  // }
-
-
   void _showSnackbar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -223,46 +157,11 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  // Future<void> _initializeCamera() async {
-  //   _cameras = await availableCameras();
-  //
-  //   if (_cameras != null && _cameras!.isNotEmpty) {
-  //     _cameraController = CameraController(_cameras![0], ResolutionPreset.medium);
-  //
-  //     await _cameraController!.initialize().then((_) {
-  //       if (!mounted) {
-  //         return;
-  //       }
-  //       setState(() {});
-  //     });
-  //   }
-  // }
-
   @override
   void dispose() {
     _cameraController?.dispose();
     super.dispose();
   }
-
-  // void _openCamera() {
-  //   if (_cameraController == null || !_cameraController!.value.isInitialized) {
-  //     return;
-  //   }
-  //
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(
-  //       builder: (context) => Scaffold(
-  //         appBar: AppBar(
-  //           title: Text('Camera Preview'),
-  //         ),
-  //         body: Center(
-  //           child: CameraPreview(_cameraController!),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
 
   void _goToScan() {
     Navigator.push(
@@ -274,77 +173,77 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        /*backgroundColor: Theme.of(context).colorScheme.inversePrimary,*/
-        backgroundColor: Color(0xFFDC2738),
-        centerTitle: true,
-        title: Text(widget.title,
+        appBar: AppBar(
+          /*backgroundColor: Theme.of(context).colorScheme.inversePrimary,*/
+          backgroundColor: Color(0xFFDC2738),
+          centerTitle: true,
+          title: Text(widget.title,
             style: TextStyle(
               color: Colors.white, // Mengatur warna teks menjadi putih
             ),
           ),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Image.asset('assets/logo.png'),
-            /*const Text(
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Image.asset('assets/logo.png'),
+              /*const Text(
               'Classifier',
             ),*/
-            ElevatedButton(
-              onPressed: _loadCsvData, // Panggil _loadCsvData ketika tombol ditekan.
-              style: ElevatedButton.styleFrom(
-                primary: Colors.red, // Mengatur warna latar belakang tombol menjadi merah
-                onPrimary: Colors.white, // Mengatur warna teks menjadi putih
+              ElevatedButton(
+                onPressed: _loadCsvData, // Panggil _loadCsvData ketika tombol ditekan.
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.red, // Mengatur warna latar belakang tombol menjadi merah
+                  onPrimary: Colors.white, // Mengatur warna teks menjadi putih
+                ),
+                child: Text('Input CSV File'),
               ),
-              child: Text('Input CSV File'),
-            ),
-            ElevatedButton(
-              onPressed: classification,
-              style: ElevatedButton.styleFrom(
-                primary: Colors.white, // Latar belakang putih
-                onPrimary: Colors.black, // Teks hitam
-                side: BorderSide(color: Colors.red, width: 1.0),  // Border merah
-              ),// Panggil _goToPage2 ketika tombol ditekan.
-              child: Text('Classify'),
-            ),
-            if (_importedFileName != null)
-              Text(
-                'Imported File: $_importedFileName',
+              ElevatedButton(
+                onPressed: classification,
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.white, // Latar belakang putih
+                  onPrimary: Colors.black, // Teks hitam
+                  side: BorderSide(color: Colors.red, width: 1.0),  // Border merah
+                ),// Panggil _goToPage2 ketika tombol ditekan.
+                child: Text('Classify'),
               ),
-            if (_isClassified)
-              Text(
-                'Result: $_resultNumb ($_result)',
-              ),
-          ],
-        ),
-      ),
-      floatingActionButton: Wrap(
-        direction: Axis.vertical,
-        children: <Widget>[
-          Container(
-            margin: EdgeInsets.all(10),
-            child: FloatingActionButton(
-              onPressed: _goToScan,
-              tooltip: 'Camera',
-              backgroundColor: Colors.red, // Latar belakang merah
-              foregroundColor: Colors.white,
-              child: const Icon(Icons.camera_alt),
-            ),
+              if (_importedFileName != null)
+                Text(
+                  'Imported File: $_importedFileName',
+                ),
+              if (_isClassified)
+                Text(
+                  'Result: $_resultNumb ($_result)',
+                ),
+            ],
           ),
-          Container(
-            margin: EdgeInsets.all(10),
-            child: FloatingActionButton(
-              onPressed:  _loadCsvData,
-              tooltip: 'Import File CSV',
-              backgroundColor: Colors.red, // Latar belakang merah
-              foregroundColor: Colors.white,
-              child: const Icon(Icons.file_upload),
+        ),
+        floatingActionButton: Wrap(
+          direction: Axis.vertical,
+          children: <Widget>[
+            Container(
+              margin: EdgeInsets.all(10),
+              child: FloatingActionButton(
+                onPressed: _goToScan,
+                tooltip: 'Camera',
+                backgroundColor: Colors.red, // Latar belakang merah
+                foregroundColor: Colors.white,
+                child: const Icon(Icons.camera_alt),
+              ),
             ),
-          )
-        ],
-      ) // This trailing comma makes auto-formatting nicer for build methods.
+            Container(
+              margin: EdgeInsets.all(10),
+              child: FloatingActionButton(
+                onPressed:  _loadCsvData,
+                tooltip: 'Import File CSV',
+                backgroundColor: Colors.red, // Latar belakang merah
+                foregroundColor: Colors.white,
+                child: const Icon(Icons.file_upload),
+              ),
+            )
+          ],
+        ) // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
